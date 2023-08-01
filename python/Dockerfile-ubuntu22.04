@@ -1,0 +1,15 @@
+FROM continuumio/miniconda3 as builder
+ARG PYTHON_MAJOR=3
+ARG PYTHON_VERSION=3.11.4
+RUN conda create --no-default-packages --prefix /usr/local/python${PYTHON_MAJOR} python=${PYTHON_VERSION} -y
+RUN cd /usr/local/python${PYTHON_MAJOR} \
+    && rm -rf share *conda* compiler_compat
+
+FROM ubuntu:22.04
+ARG PYTHON_MAJOR=3
+ARG PYTHON_VERSION=3.11.4
+COPY --from=builder /usr/local/python${PYTHON_MAJOR} usr/local/python${PYTHON_MAJOR}
+RUN ln -s /usr/local/python${PYTHON_MAJOR}/bin/python${PYTHON_MAJOR} /usr/local/python${PYTHON_MAJOR} \
+    && ln -s /usr/local/python/bin/pip${PYTHON_MAJOR} /usr/bin/pip${PYTHON_MAJOR}
+ENV PATH=$PATH:/usr/local/python${PYTHON_MAJOR}/bin
+CMD ["python${PYTHON_MAJOR}"]
